@@ -216,7 +216,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         local current_url = nil
         local current_size = 0
         for quality, data in pairs(html5_data[type_]) do
-          if data["size"] > current_size then
+          if quality ~= "sample_duration" and data["size"] ~= nil and data["size"] > current_size then
             current_url = data["url"]
             current_size = data["size"]
           end
@@ -229,7 +229,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       if not found_data["video"] then
         io.stdout:write("Could not find video.\n")
         io.stdout:flush()
-        abortgrab()
+        abort_item()
       end
       local download_url = json["file_versions"]["share"]["default"]
       if download_url then
@@ -239,8 +239,18 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     end
     if string.match(url, "^https?://[^/]*coub%.com/api/v2/coubs/[^/]+/segments") then
       local json = JSON:decode(html)
+      local found_cutter = false
       for _, data in pairs(json["segments"]) do
-        check(data["cutter_ios"])
+        local cutter_ios = data["cutter_ios"]
+        if string.match(cutter_ios, "^https?://") then
+          found_cutter = true
+          check(cutter_ios)
+        end
+      end
+      if not found_cutter then
+        io.stdout:write("Could not find cutter_ios video.\n")
+        io.stdout:flush()
+        abort_item()
       end
       if json["audio_track"] then
         if json["audio_track"]["file"] then
