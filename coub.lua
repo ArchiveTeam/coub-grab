@@ -250,6 +250,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       if not found_cutter then
         io.stdout:write("Could not find cutter_ios video.\n")
         io.stdout:flush()
+        os.execute("sleep 10")
         abort_item()
       end
       if json["audio_track"] then
