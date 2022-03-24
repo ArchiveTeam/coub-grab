@@ -59,7 +59,7 @@ if not WGET_AT:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = '20220324.07'
+VERSION = '20220324.08'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
 TRACKER_ID = 'coub'
 TRACKER_HOST = 'legacy-api.arpa.li'
@@ -277,8 +277,13 @@ class WgetArgs(object):
             wget_args.append('item-name://'+item_name)
             item_type, item_value = item_name.split(':', 1)
             if item_type == 'v':
+                url = 'https://coub.com/api/v2/coubs/' + item_value
+                status_code = requests.head(url).status_code
+                print('Got', status_code, 'for', url)
+                if status_code == 404:
+                    continue
                 wget_args.extend(['--warc-header', 'coub-video: '+item_value])
-                wget_args.append('https://coub.com/api/v2/coubs/'+item_value)
+                wget_args.append(url)
             else:
                 raise Exception('Unknown item')
 
