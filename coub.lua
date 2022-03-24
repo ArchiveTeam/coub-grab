@@ -25,6 +25,7 @@ local addedtolist = {}
 local abortgrab = false
 
 local discovered_items = {}
+local discovered_audio = {}
 local bad_items = {}
 local ids = {}
 
@@ -194,6 +195,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       end
       local id = tostring(json["id"])
       check("https://coub.com/api/v2/coubs/" .. id)
+      check("https://coub.com/api/v2/coubs/" .. id .. "/segments")
       check("https://coub.com/api/v2/coubs/" .. id .. ".json")
       discovered_items["c:" .. tostring(json["channel_id"])] = true
       for _, tag in pairs(json["tags"]) do
@@ -233,6 +235,20 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       if download_url then
         check(download_url)
         check(download_url .. "?dl=1")
+      end
+    end
+    if string.match(url, "^https?://[^/]*coub%.com/api/v2/coubs/[^/]+/segments") then
+      local json = JSON:decode(html)
+      for _, data in pairs(json["segments"]) do
+        check(data["cutter_ios"])
+      end
+      if json["audio_track"] then
+        if json["audio_track"]["file"] then
+          discovered_audio[json["audio_track"]["file"]] = true
+        end
+        if json["audio_track"]["image"] then
+          discovered_audio[json["audio_track"]["image"]] = true
+        end
       end
     end
     --[[for newurl in string.gmatch(string.gsub(html, "&quot;", '"'), '([^"]+)') do
@@ -363,7 +379,8 @@ wget.callbacks.finish = function(start_time, end_time, wall_time, numurls, total
   end
   file:close()
   for key, data in pairs({
-    ["coub-0q4i22xyiuzecha"] = discovered_items
+    ["coub-0q4i22xyiuzecha"] = discovered_items,
+    ["coub-tracks-n713kvf8dhuc9x0"] = discovered_audio
   }) do
     local newurls = nil
     local count = 0
