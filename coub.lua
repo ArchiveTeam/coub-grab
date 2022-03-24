@@ -353,7 +353,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   local sleep_time = 0
 
   if string.match(url["url"], "^https?://coub%.com/") then
-    sleep_time = 2
+    sleep_time = 4
   end
 
   if sleep_time > 0.001 then
