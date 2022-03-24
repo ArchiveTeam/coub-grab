@@ -181,22 +181,22 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       end
       ids[permalink] = true
       check("https://coub.com/view/" .. permalink)
-      check("https://coub.com/api/v2/coubs/" .. permalink .. "/category_suggestions?count=40")
-      check("https://coub.com/api/v2/coubs/" .. permalink)
-      check("https://coub.com/api/v2/coubs/" .. permalink .. ".json")
+      --check("https://coub.com/api/v2/coubs/" .. permalink .. "/category_suggestions?count=40")
+      --check("https://coub.com/api/v2/coubs/" .. permalink)
+      --check("https://coub.com/api/v2/coubs/" .. permalink .. ".json")
       for _, muted in pairs({"true", "false"}) do
         for _, autostart in pairs({"true", "false"}) do
           for _, originalSize in pairs({"true", "false"}) do
             for _, startWithHD in pairs({"true", "false"}) do
-              check("https://coub.com/embed/18rpdy?muted=" .. muted .. "&autostart=" .. autostart .. "&originalSize=" .. originalSize .. "&startWithHD=" .. startWithHD)
+              --check("https://coub.com/embed/18rpdy?muted=" .. muted .. "&autostart=" .. autostart .. "&originalSize=" .. originalSize .. "&startWithHD=" .. startWithHD)
             end
           end
         end
       end
       local id = tostring(json["id"])
-      check("https://coub.com/api/v2/coubs/" .. id)
-      check("https://coub.com/api/v2/coubs/" .. id .. "/segments")
-      check("https://coub.com/api/v2/coubs/" .. id .. ".json")
+      --check("https://coub.com/api/v2/coubs/" .. id)
+      --check("https://coub.com/api/v2/coubs/" .. id .. "/segments")
+      --check("https://coub.com/api/v2/coubs/" .. id .. ".json")
       discovered_items["c:" .. tostring(json["channel_id"])] = true
       for _, tag in pairs(json["tags"]) do
         discovered_items["t:" .. tostring(tag["id"]) .. ":" .. tag["value"]] = true
@@ -351,6 +351,10 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   tries = 0
 
   local sleep_time = 0
+
+  if string.match(url["url"], "^https?://coub%.com/") then
+    sleep_time = 2
+  end
 
   if sleep_time > 0.001 then
     os.execute("sleep " .. sleep_time)
