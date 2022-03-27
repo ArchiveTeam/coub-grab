@@ -204,6 +204,10 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     end
     if string.match(url, "^https?://[^/]*coub%.com/view/") then
       local json = JSON:decode(string.match(html, "<script%s+id='coubPageCoubJson'%s+type='text/json'>%s*({.-})%s*</script>"))
+      discovered_items["channel:" .. json["channel"]["permalink"]] = true
+      for _, tag in pairs(json["tags"]) do
+        discovered_items["tag:" .. tag["value"]] = true
+      end
       local image_url = json["first_frame_versions"]["template"]
       for _, version in pairs(json["first_frame_versions"]["versions"]) do
         check(string.gsub(image_url, "%%{version}", version))
@@ -299,8 +303,10 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   io.stdout:write(url_count .. "=" .. status_code .. " " .. url["url"] .. " \n")
   io.stdout:flush()
 
-  local value = string.match(url["url"], "^https?://coub%.com/api/v2/coubs/([0-9]+)$")
-  local type_ = "v"
+  --[[local value = string.match(url["url"], "^https?://coub%.com/api/v2/coubs/([0-9]+)$")
+  local type_ = "v"]]
+  local value = string.match(url["url"], "^https?://coub%.com/view/([0-9a-zA-Z]+)$")
+  local type_ = "coup"
   if value then
     abortgrab = false
     item_type = type_
